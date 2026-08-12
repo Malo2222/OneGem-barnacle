@@ -1,0 +1,6 @@
+{
+  "name": "Gem — Unified Social Inbox",
+  "description": "Unified social inbox merging iMessage, Instagram, Snapchat, and Email contacts into a single thread view with PWA and OCR capabilities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
