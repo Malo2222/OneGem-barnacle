@@ -187,3 +187,18 @@
 @utility gem-brand {
   background-image: var(--gradient-brand);
 }
+
+/* Blueprint / HUD grid backdrop for the people map. */
+@utility gem-grid {
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--primary) 16%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--primary) 16%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in oklab, var(--border) 60%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--border) 60%, transparent) 1px, transparent 1px);
+  background-size:
+    120px 120px,
+    120px 120px,
+    24px 24px,
+    24px 24px;
+  background-position: center center;
+}

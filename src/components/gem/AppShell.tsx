@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { Inbox, Plus, Users, Settings } from "lucide-react";
+import { Inbox, Waypoints, Plus, Users, Settings } from "lucide-react";
 import logo from "@/assets/gem-logo.png";
 import { useSession } from "@/hooks/useGem";
 import { ThemeToggle } from "./theme";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/", label: "Inbox", icon: Inbox },
+  { to: "/map", label: "Map", icon: Waypoints },
   { to: "/capture", label: "Capture", icon: Plus },
   { to: "/people", label: "People", icon: Users },
   { to: "/settings", label: "Settings", icon: Settings },
