@@ -1,13 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useRef } from "react";
-import {
-  ClipboardPaste,
-  Sparkle,
-  Camera,
-  Upload,
-  Loader2,
-  Image as ImageIcon,
-} from "lucide-react";
+import { ClipboardPaste, Sparkle, Camera, Upload, Loader as Loader2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/gem/AppShell";
 import { PlatformBadge } from "@/components/gem/PlatformBadge";
@@ -25,6 +18,7 @@ import {
 } from "@/hooks/useGem";
 import { PLATFORMS, parseCapture, type Platform } from "@/lib/gem";
 import { isAlikeName } from "@/lib/contact-sync";
+import { useSettings } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/capture")({
@@ -48,10 +42,13 @@ export const Route = createFileRoute("/capture")({
 });
 
 function Capture() {
+  const [settings] = useSettings();
   const [raw, setRaw] = useState("");
   const [sender, setSender] = useState("");
   const [body, setBody] = useState("");
-  const [platform, setPlatform] = useState<Platform>("sms");
+  const [platform, setPlatform] = useState<Platform>(
+    settings.defaultPlatform as Platform,
+  );
   const [contactId, setContactId] = useState<string>("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);

@@ -205,16 +205,13 @@ export default {
         if (!sender) sender = "Unknown Contact";
         if (!platform) platform = "sms";
 
-        // Find primary user_id
+        // user_id can be passed explicitly (recommended) or inferred from existing contacts
         let userId: string | null = null;
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id")
-          .limit(1);
-        if (profiles && profiles.length > 0) {
-          userId = profiles[0].id;
+        const explicitUserId = String(payload.user_id ?? payload.uid ?? "").trim();
+        if (explicitUserId) {
+          userId = explicitUserId;
         } else {
-          const { data: contacts } = await supabase
+          const { data: contacts } = await supabaseAdmin
             .from("contacts")
             .select("user_id")
             .not("user_id", "is", null)
@@ -226,8 +223,8 @@ export default {
 
         let contactId: string | null = null;
         if (userId) {
-          // Find existing contact by name
-          const { data: existing } = await supabase
+          // Find existing contact by name (case-insensitive)
+          const { data: existing } = await supabaseAdmin
             .from("contacts")
             .select("id, display_name")
             .eq("user_id", userId);
@@ -242,7 +239,7 @@ export default {
           }
 
           if (!contactId) {
-            const { data: newContact } = await supabase
+            const { data: newContact } = await supabaseAdmin
               .from("contacts")
               .insert({ user_id: userId, display_name: sender })
               .select("id")
@@ -251,7 +248,7 @@ export default {
           }
 
           if (contactId) {
-            await supabase.from("messages").insert({
+            await supabaseAdmin.from("messages").insert({
               user_id: userId,
               contact_id: contactId,
               platform,
@@ -271,6 +268,7 @@ export default {
               body,
               platform,
               contactId,
+              userId,
             },
           }),
           {

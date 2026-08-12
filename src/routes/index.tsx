@@ -14,6 +14,7 @@ import {
   useUserId,
 } from "@/hooks/useGem";
 import { initials, timeAgo } from "@/lib/gem";
+import { useSettings } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -38,7 +39,10 @@ export const Route = createFileRoute("/")({
 
 function Inbox() {
   const [q, setQ] = useState("");
-  const [viewMode, setViewMode] = useState<"list" | "spatial">("list");
+  const [settings] = useSettings();
+  const [viewMode, setViewMode] = useState<"list" | "spatial">(
+    settings.showSpatialView ? "list" : "list",
+  );
   const { data: contacts = [], isLoading } = useContacts();
   const { data: handles = [] } = useHandles();
   const { data: messages = [] } = useMessages();
@@ -113,32 +117,34 @@ function Inbox() {
             />
           </div>
 
-          <div className="flex items-center rounded-full border border-border bg-surface-2 p-1">
-            <button
-              onClick={() => setViewMode("list")}
-              aria-label="List view"
-              className={cn(
-                "flex size-10 items-center justify-center rounded-full text-xs transition-all",
-                viewMode === "list"
-                  ? "gem-brand text-primary-foreground shadow-sm font-semibold"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <List className="size-4" />
-            </button>
-            <button
-              onClick={() => setViewMode("spatial")}
-              aria-label="3D Spatial view"
-              className={cn(
-                "flex size-10 items-center justify-center rounded-full text-xs transition-all",
-                viewMode === "spatial"
-                  ? "gem-brand text-primary-foreground shadow-sm font-semibold"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <Network className="size-4" />
-            </button>
-          </div>
+          {settings.showSpatialView ? (
+            <div className="flex items-center rounded-full border border-border bg-surface-2 p-1">
+              <button
+                onClick={() => setViewMode("list")}
+                aria-label="List view"
+                className={cn(
+                  "flex size-10 items-center justify-center rounded-full text-xs transition-all",
+                  viewMode === "list"
+                    ? "gem-brand text-primary-foreground shadow-sm font-semibold"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <List className="size-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("spatial")}
+                aria-label="3D Spatial view"
+                className={cn(
+                  "flex size-10 items-center justify-center rounded-full text-xs transition-all",
+                  viewMode === "spatial"
+                    ? "gem-brand text-primary-foreground shadow-sm font-semibold"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Network className="size-4" />
+              </button>
+            </div>
+          ) : null}
         </div>
 
         {isLoading ? (
@@ -176,9 +182,12 @@ function Inbox() {
                   <Link
                     to="/thread/$contactId"
                     params={{ contactId: contact.id }}
-                    className="gem-surface flex items-center gap-3.5 rounded-[1.6rem] p-3.5 transition-all active:scale-[0.985] hover:gem-float"
+                    className={cn(
+                      "gem-surface flex items-center gap-3.5 rounded-[1.6rem] transition-all active:scale-[0.985] hover:gem-float",
+                      settings.compactInboxCards ? "p-2.5" : "p-3.5",
+                    )}
                   >
-                    <Avatar contact={contact} />
+                    <Avatar contact={contact} compact={settings.compactInboxCards} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="truncate font-semibold tracking-tight">
@@ -202,11 +211,13 @@ function Inbox() {
                           {last?.body ?? "No messages captured yet"}
                         </span>
                       </div>
+                      {!settings.compactInboxCards ? (
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {platforms.map((p) => (
                           <PlatformBadge key={p} platform={p} size="xs" />
                         ))}
                       </div>
+                    ) : null}
                     </div>
                     {unread > 0 ? (
                       <span className="gem-brand flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-primary-foreground shadow-md animate-pulse">
@@ -242,17 +253,20 @@ function Inbox() {
 
 function Avatar({
   contact,
+  compact = false,
 }: {
   contact: {
     display_name: string;
     avatar_url: string | null;
     accent: string | null;
   };
+  compact?: boolean;
 }) {
   return (
     <div
       className={cn(
-        "relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full text-base font-semibold text-primary-foreground",
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold text-primary-foreground",
+        compact ? "size-10 text-sm" : "size-14 text-base",
       )}
       style={{
         backgroundImage: contact.accent

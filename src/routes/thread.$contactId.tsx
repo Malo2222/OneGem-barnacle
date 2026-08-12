@@ -30,6 +30,7 @@ import {
   useUserId,
 } from "@/hooks/useGem";
 import { deepLink, platformMeta, timeAgo, webFallback } from "@/lib/gem";
+import { useSettings } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/thread/$contactId")({
@@ -63,6 +64,7 @@ function Thread() {
   const userId = useUserId();
 
   const contact = contacts.find((c) => c.id === contactId);
+  const [settings] = useSettings();
   const myHandles = useMemo(
     () => handles.filter((h) => h.contact_id === contactId),
     [handles, contactId],
@@ -203,14 +205,18 @@ function Thread() {
     }
 
     try {
-      await navigator.clipboard.writeText(draft);
-      toast.success(
-        `Copied — opening ${platformMeta(activeHandle.platform).label}. Paste & send.`,
-      );
+      if (settings.copyOnSend) {
+        await navigator.clipboard.writeText(draft);
+        toast.success(
+          `Copied — opening ${platformMeta(activeHandle.platform).label}. Paste & send.`,
+        );
+      }
     } catch {
-      toast.message(
-        "Copy blocked by the browser — long-press your text to copy.",
-      );
+      if (settings.copyOnSend) {
+        toast.message(
+          "Copy blocked by the browser — long-press your text to copy.",
+        );
+      }
     }
     await addMessage.mutateAsync({
       user_id: userId,
@@ -224,8 +230,10 @@ function Thread() {
     const url = deepLink(activeHandle.platform, activeHandle.value);
     setDraft("");
     window.location.href = url;
-    const fallback = webFallback(activeHandle.platform, activeHandle.value);
-    if (fallback) setTimeout(() => window.open(fallback, "_blank"), 1200);
+    if (settings.deepLinkFallback) {
+      const fallback = webFallback(activeHandle.platform, activeHandle.value);
+      if (fallback) setTimeout(() => window.open(fallback, "_blank"), 1200);
+    }
   };
 
   return (
@@ -265,7 +273,7 @@ function Thread() {
     >
       <div className="mx-auto max-w-md space-y-3 pb-52">
         {/* Subtle Late-Night Card Signal */}
-        {metrics.isLateNight ? (
+        {settings.showLateNightAlerts && metrics.isLateNight ? (
           <div className="flex items-center justify-between rounded-2xl border border-amber-500/30 bg-amber-950/20 px-3.5 py-2 text-xs text-amber-300 backdrop-blur-md">
             <div className="flex items-center gap-2">
               <Clock className="size-4 text-amber-400 animate-pulse" />
@@ -281,7 +289,13 @@ function Thread() {
         <div className="gem-surface rounded-3xl p-3.5 space-y-2.5">
           <div className="flex items-center justify-between text-xs font-semibold text-foreground">
             <span className="flex items-center gap-1.5 text-gold">
-              <Flame className="size-4" /> Hot Watch Status: {metrics.hotStatus}
+              {settings.showHotWatch ? (
+                <>
+                  <Flame className="size-4" /> Hot Watch Status: {metrics.hotStatus}
+                </>
+              ) : (
+                <span className="text-muted-foreground">Conversation</span>
+              )}
             </span>
             <button
               onClick={() => setShowNotes(!showNotes)}
@@ -296,20 +310,22 @@ function Thread() {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
-            <div className="rounded-2xl border border-border bg-surface-2 p-2 text-center">
-              <p className="font-mono text-foreground font-bold">
-                {metrics.ratioIn}% Them / {metrics.ratioOut}% You
-              </p>
-              <p className="text-[10px]">Message Volume Ratio</p>
+          {settings.showRelationshipRatio ? (
+            <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
+              <div className="rounded-2xl border border-border bg-surface-2 p-2 text-center">
+                <p className="font-mono text-foreground font-bold">
+                  {metrics.ratioIn}% Them / {metrics.ratioOut}% You
+                </p>
+                <p className="text-[10px]">Message Volume Ratio</p>
+              </div>
+              <div className="rounded-2xl border border-border bg-surface-2 p-2 text-center">
+                <p className="font-mono text-foreground font-bold">
+                  ~{metrics.avgInWords} words / ~{metrics.avgOutWords} words
+                </p>
+                <p className="text-[10px]">Avg Text Length</p>
+              </div>
             </div>
-            <div className="rounded-2xl border border-border bg-surface-2 p-2 text-center">
-              <p className="font-mono text-foreground font-bold">
-                ~{metrics.avgInWords} words / ~{metrics.avgOutWords} words
-              </p>
-              <p className="text-[10px]">Avg Text Length</p>
-            </div>
-          </div>
+          ) : null}
 
           {/* Collapsible Notes Section */}
           <AnimatePresence>
