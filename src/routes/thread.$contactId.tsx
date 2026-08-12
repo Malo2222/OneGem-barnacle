@@ -204,20 +204,22 @@ function Thread() {
       return;
     }
 
-    try {
-      if (settings.copyOnSend) {
+    const isEmail = activeHandle.platform === "email";
+
+    // Email (mailto:) opens a compose window with the body pre-filled — no clipboard needed
+    if (!isEmail && settings.copyOnSend) {
+      try {
         await navigator.clipboard.writeText(draft);
         toast.success(
           `Copied — opening ${platformMeta(activeHandle.platform).label}. Paste & send.`,
         );
-      }
-    } catch {
-      if (settings.copyOnSend) {
+      } catch {
         toast.message(
           "Copy blocked by the browser — long-press your text to copy.",
         );
       }
     }
+
     await addMessage.mutateAsync({
       user_id: userId,
       contact_id: contactId,
@@ -227,10 +229,22 @@ function Thread() {
       body: draft,
       read: true,
     });
-    const url = deepLink(activeHandle.platform, activeHandle.value);
+
+    // For email, use mailto: with subject and body pre-filled
+    let url: string;
+    if (isEmail) {
+      const subject = encodeURIComponent(`Re: ${contact?.display_name ?? ""}`);
+      const body = encodeURIComponent(draft);
+      url = `mailto:${activeHandle.value}?subject=${subject}&body=${body}`;
+    } else {
+      url = deepLink(activeHandle.platform, activeHandle.value);
+    }
+
     setDraft("");
     window.location.href = url;
-    if (settings.deepLinkFallback) {
+
+    // Web fallback only for non-email platforms with a web URL
+    if (!isEmail && settings.deepLinkFallback) {
       const fallback = webFallback(activeHandle.platform, activeHandle.value);
       if (fallback) setTimeout(() => window.open(fallback, "_blank"), 1200);
     }
@@ -500,8 +514,10 @@ function Thread() {
             </button>
           </div>
           <p className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground">
-            <ExternalLink className="size-3" /> Send copies your text and opens
-            the real chat — nothing is posted for you.
+            <ExternalLink className="size-3" />
+            {activeHandle?.platform === "email"
+              ? "Send opens your email app with the message pre-filled."
+              : "Send copies your text and opens the real chat — nothing is posted for you."}
           </p>
         </div>
       </div>

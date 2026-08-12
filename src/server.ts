@@ -63,13 +63,18 @@ const SUPABASE_URL =
   process.env.VITE_SUPABASE_URL ||
   process.env.SUPABASE_URL ||
   "https://zqwwgcfahfzckmapilhs.supabase.co";
-const SUPABASE_KEY =
+const SUPABASE_SERVICE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  process.env.SUPABASE_PUBLISHABLE_KEY ||
-  "sb_publishable_IIBKeW7ACXK4_EnM57Pl7A_j3VvTeUh";
+  process.env.VITE_SUPABASE_SERVICE_ROLE_KEY ||
+  "";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+if (!SUPABASE_SERVICE_KEY) {
+  console.warn(
+    "[gem] SUPABASE_SERVICE_ROLE_KEY is not set — server-side ingest will fail RLS. Add it to .env",
+  );
+}
+
+const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -82,6 +87,25 @@ const corsHeaders = {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     const url = new URL(request.url);
+
+    // Serve manifest with CORS headers to prevent Vercel SSO redirect block
+    if (url.pathname === "/manifest.webmanifest" || url.pathname === "/manifest.json") {
+      try {
+        const manifestPath = new URL("./public/manifest.webmanifest", import.meta.url);
+        const fileResp = await fetch(manifestPath);
+        const manifestText = await fileResp.text();
+        return new Response(manifestText, {
+          status: 200,
+          headers: {
+            "Content-Type": "application/manifest+json; charset=utf-8",
+            "Access-Control-Allow-Origin": "*",
+            "Cache-Control": "public, max-age=3600",
+          },
+        });
+      } catch {
+        // fall through to SSR if file read fails
+      }
+    }
 
     // Handle CORS Preflight for any API route
     if (request.method === "OPTIONS" && url.pathname.startsWith("/api/")) {
@@ -204,6 +228,13 @@ export default {
 
         if (!sender) sender = "Unknown Contact";
         if (!platform) platform = "sms";
+
+        // Normalize sender based on platform
+        if (platform === "instagram" || platform === "snapchat") {
+          sender = sender.replace(/^@/, "").trim();
+        } else if (platform === "email") {
+          sender = sender.replace(/[<>]/g, "").trim();
+        }
 
         // user_id can be passed explicitly (recommended) or inferred from existing contacts
         let userId: string | null = null;

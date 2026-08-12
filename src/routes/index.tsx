@@ -210,6 +210,14 @@ function Inbox() {
                         <span className="truncate text-xs text-muted-foreground">
                           {last?.body ?? "No messages captured yet"}
                         </span>
+                        {platforms.length > 0 &&
+                        platforms.every((p) =>
+                          ["snapchat", "instagram", "email"].includes(p),
+                        ) ? (
+                          <span className="ml-auto shrink-0 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                            paste &amp; send
+                          </span>
+                        ) : null}
                       </div>
                       {!settings.compactInboxCards ? (
                       <div className="mt-1.5 flex flex-wrap gap-1">
