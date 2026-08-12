@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CaptureRouteImport } from './routes/capture'
+import { Route as MapRouteImport } from './routes/map'
 import { Route as PeopleRouteImport } from './routes/people'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ThreadContactIdRouteImport } from './routes/thread.$contactId'
@@ -29,6 +30,11 @@ const AuthRoute = AuthRouteImport.update({
 const CaptureRoute = CaptureRouteImport.update({
   id: '/capture',
   path: '/capture',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PeopleRoute = PeopleRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/capture': typeof CaptureRoute
+  '/map': typeof MapRoute
   '/people': typeof PeopleRoute
   '/settings': typeof SettingsRoute
   '/thread/$contactId': typeof ThreadContactIdRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/capture': typeof CaptureRoute
+  '/map': typeof MapRoute
   '/people': typeof PeopleRoute
   '/settings': typeof SettingsRoute
   '/thread/$contactId': typeof ThreadContactIdRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/capture': typeof CaptureRoute
+  '/map': typeof MapRoute
   '/people': typeof PeopleRoute
   '/settings': typeof SettingsRoute
   '/thread/$contactId': typeof ThreadContactIdRoute
@@ -75,15 +84,28 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/capture' | '/people' | '/settings' | '/thread/$contactId'
+    | '/'
+    | '/auth'
+    | '/capture'
+    | '/map'
+    | '/people'
+    | '/settings'
+    | '/thread/$contactId'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/auth' | '/capture' | '/people' | '/settings' | '/thread/$contactId'
+    | '/'
+    | '/auth'
+    | '/capture'
+    | '/map'
+    | '/people'
+    | '/settings'
+    | '/thread/$contactId'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/capture'
+    | '/map'
     | '/people'
     | '/settings'
     | '/thread/$contactId'
@@ -93,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   CaptureRoute: typeof CaptureRoute
+  MapRoute: typeof MapRoute
   PeopleRoute: typeof PeopleRoute
   SettingsRoute: typeof SettingsRoute
   ThreadContactIdRoute: typeof ThreadContactIdRoute
@@ -119,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/capture'
       fullPath: '/capture'
       preLoaderRoute: typeof CaptureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/people': {
@@ -149,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   CaptureRoute: CaptureRoute,
+  MapRoute: MapRoute,
   PeopleRoute: PeopleRoute,
   SettingsRoute: SettingsRoute,
   ThreadContactIdRoute: ThreadContactIdRoute,
