@@ -85,6 +85,58 @@ export function timeAgo(iso: string) {
   });
 }
 
+export function normalizePhone(value: string) {
+  return value.replace(/\D/g, "").replace(/^1(?=\d{10}$)/, "");
+}
+
+export function normalizeHandle(value: string) {
+  return value.trim().replace(/^@/, "").toLowerCase();
+}
+
+export function firstName(value: string) {
+  return value
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)[0]?.toLowerCase() ?? "";
+}
+
+export function matchContact<T extends { id: string; display_name: string }>(
+  sender: string,
+  platform: Platform,
+  contacts: T[],
+  handles: { contact_id: string; platform: string; value: string }[],
+) {
+  const raw = sender.trim();
+  if (!raw) return null;
+
+  const exactName = raw.toLowerCase();
+  const senderFirst = firstName(raw);
+  const senderHandle = normalizeHandle(raw);
+  const senderPhone = normalizePhone(raw);
+
+  const byName = contacts.find((c) => c.display_name.trim().toLowerCase() === exactName);
+  if (byName) return byName;
+
+  const byHandle = handles.find((h) => {
+    const samePlatform = h.platform === platform;
+    const sameText = normalizeHandle(h.value) === senderHandle;
+    const sameRawValue = h.value.trim().toLowerCase() === raw.toLowerCase();
+    return samePlatform && (sameText || sameRawValue);
+  });
+  if (byHandle) return contacts.find((c) => c.id === byHandle.contact_id) ?? null;
+
+  const byPhone = handles.find((h) => {
+    if (h.platform !== "sms" && h.platform !== "imessage") return false;
+    return normalizePhone(h.value) === senderPhone;
+  });
+  if (byPhone) return contacts.find((c) => c.id === byPhone.contact_id) ?? null;
+
+  const firstNameMatch = contacts.find((c) => firstName(c.display_name) === senderFirst);
+  if (firstNameMatch) return firstNameMatch;
+
+  return null;
+}
+
 /**
  * Parses pasted notification text into { sender, body, platform }.
  * Handles the common iOS notification shapes:

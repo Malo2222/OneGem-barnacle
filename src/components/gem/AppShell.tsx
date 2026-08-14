@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Inbox, Plus, Users, Settings } from "lucide-react";
 import logo from "@/assets/gem-logo.png";
-import { useSession } from "@/hooks/useGem";
+import { useGemRealtime, useSession } from "@/hooks/useGem";
 import { ThemeToggle } from "./theme";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +27,8 @@ export function AppShell({
   const { session, loading } = useSession();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useGemRealtime();
 
   useEffect(() => {
     if (!loading && !session) navigate({ to: "/auth" });

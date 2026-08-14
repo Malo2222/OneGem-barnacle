@@ -14,7 +14,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CaptureRouteImport } from './routes/capture'
 import { Route as PeopleRouteImport } from './routes/people'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SyncRouteImport } from './routes/sync'
 import { Route as ThreadContactIdRouteImport } from './routes/thread.$contactId'
+import { Route as ApiPublicIngestRouteImport } from './routes/api/public/ingest'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -41,9 +43,19 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SyncRoute = SyncRouteImport.update({
+  id: '/sync',
+  path: '/sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ThreadContactIdRoute = ThreadContactIdRouteImport.update({
   id: '/thread/$contactId',
   path: '/thread/$contactId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicIngestRoute = ApiPublicIngestRouteImport.update({
+  id: '/api/public/ingest',
+  path: '/api/public/ingest',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -53,7 +65,9 @@ export interface FileRoutesByFullPath {
   '/capture': typeof CaptureRoute
   '/people': typeof PeopleRoute
   '/settings': typeof SettingsRoute
+  '/sync': typeof SyncRoute
   '/thread/$contactId': typeof ThreadContactIdRoute
+  '/api/public/ingest': typeof ApiPublicIngestRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,7 +75,9 @@ export interface FileRoutesByTo {
   '/capture': typeof CaptureRoute
   '/people': typeof PeopleRoute
   '/settings': typeof SettingsRoute
+  '/sync': typeof SyncRoute
   '/thread/$contactId': typeof ThreadContactIdRoute
+  '/api/public/ingest': typeof ApiPublicIngestRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,15 +86,31 @@ export interface FileRoutesById {
   '/capture': typeof CaptureRoute
   '/people': typeof PeopleRoute
   '/settings': typeof SettingsRoute
+  '/sync': typeof SyncRoute
   '/thread/$contactId': typeof ThreadContactIdRoute
+  '/api/public/ingest': typeof ApiPublicIngestRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/capture' | '/people' | '/settings' | '/thread/$contactId'
+    | '/'
+    | '/auth'
+    | '/capture'
+    | '/people'
+    | '/settings'
+    | '/sync'
+    | '/thread/$contactId'
+    | '/api/public/ingest'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/auth' | '/capture' | '/people' | '/settings' | '/thread/$contactId'
+    | '/'
+    | '/auth'
+    | '/capture'
+    | '/people'
+    | '/settings'
+    | '/sync'
+    | '/thread/$contactId'
+    | '/api/public/ingest'
   id:
     | '__root__'
     | '/'
@@ -86,7 +118,9 @@ export interface FileRouteTypes {
     | '/capture'
     | '/people'
     | '/settings'
+    | '/sync'
     | '/thread/$contactId'
+    | '/api/public/ingest'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,7 +129,9 @@ export interface RootRouteChildren {
   CaptureRoute: typeof CaptureRoute
   PeopleRoute: typeof PeopleRoute
   SettingsRoute: typeof SettingsRoute
+  SyncRoute: typeof SyncRoute
   ThreadContactIdRoute: typeof ThreadContactIdRoute
+  ApiPublicIngestRoute: typeof ApiPublicIngestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -135,11 +171,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sync': {
+      id: '/sync'
+      path: '/sync'
+      fullPath: '/sync'
+      preLoaderRoute: typeof SyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/thread/$contactId': {
       id: '/thread/$contactId'
       path: '/thread/$contactId'
       fullPath: '/thread/$contactId'
       preLoaderRoute: typeof ThreadContactIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ingest': {
+      id: '/api/public/ingest'
+      path: '/api/public/ingest'
+      fullPath: '/api/public/ingest'
+      preLoaderRoute: typeof ApiPublicIngestRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -151,7 +201,9 @@ const rootRouteChildren: RootRouteChildren = {
   CaptureRoute: CaptureRoute,
   PeopleRoute: PeopleRoute,
   SettingsRoute: SettingsRoute,
+  SyncRoute: SyncRoute,
   ThreadContactIdRoute: ThreadContactIdRoute,
+  ApiPublicIngestRoute: ApiPublicIngestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

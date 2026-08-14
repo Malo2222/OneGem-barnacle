@@ -4,12 +4,13 @@
 - iOS sandboxes Snapchat / Instagram / iMessage. No app, Shortcut, or website can silently scrape their chats.
   Anything that claims otherwise gets your accounts banned or simply cannot run.
 - What IS possible and is what Gem does:
-  1. **Manual/assisted capture**: paste or share notification text / chat text into Gem (share sheet, paste, or typed).
-  2. **Identity merge**: one person = one Gem contact, with many handles (imessage/sms/instagram x2/snapchat/email).
-  3. **Unified thread view** with per-platform badges.
+  1. **Unified messenger**: one inbox for iMessage, SMS, Instagram, Snapchat, and email, with one person = one Gem contact.
+  2. **Manual/assisted capture**: paste or share notification text / chat text into Gem (share sheet, paste, or typed).
+  3. **Identity merge**: many handles per person (imessage/sms/instagram x2/snapchat/email) and a single thread view with per-platform badges.
   4. **Reply bridge**: type in Gem -> tap Send -> text is copied to clipboard AND the native app deep-links straight
      to that person's chat -> you paste + send. One tap, no notification side effects (no snap sent, no story viewed).
   5. **Email (school)**: only channel that can be fully automated later (IMAP via a server function).
+  6. **Life360 reserved**: keep the same inbox architecture ready for family location updates and share-safe check-ins later without mixing it with message data.
 - Delivery: web app (PWA). Add to Home Screen on the 14 = looks/behaves like a native app, no Xcode, no $99 dev account.
   Later the same UI can be wrapped in a Swift WKWebView shell if you want App Store/native push.
 

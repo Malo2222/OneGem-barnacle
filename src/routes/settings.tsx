@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   LogOut,
   ShieldCheck,
@@ -6,6 +6,7 @@ import {
   Terminal,
   Copy,
   Check,
+  Wifi,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -104,6 +105,13 @@ function SettingsPage() {
             never sends a snap, opens a story, or fires a read receipt.
           </p>
         </section>
+
+        <Link
+          to="/sync"
+          className="gem-surface flex h-12 items-center justify-center gap-2 rounded-[1.6rem] text-sm font-medium text-foreground"
+        >
+          <Wifi className="size-4 text-gold" /> Sync & device keys
+        </Link>
 
         <Button
           variant="ghost"

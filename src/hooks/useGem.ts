@@ -33,6 +33,16 @@ export type Message = {
   read: boolean;
 };
 
+export type DeviceToken = {
+  id: string;
+  user_id: string;
+  name: string | null;
+  token: string;
+  active: boolean;
+  created_at: string;
+  last_used_at: string | null;
+};
+
 export function useSession() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -173,6 +183,81 @@ export function useInvalidateGem() {
 export function useUserId() {
   const { session } = useSession();
   return session?.user.id ?? null;
+}
+
+export function useGemRealtime() {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("gem-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "messages" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["messages"] });
+          queryClient.invalidateQueries({ queryKey: ["contacts"] });
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "contacts" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["contacts"] });
+          queryClient.invalidateQueries({ queryKey: ["messages"] });
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "handles" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["handles"] });
+          queryClient.invalidateQueries({ queryKey: ["contacts"] });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+}
+
+export function useDeviceTokens() {
+  return useQuery({
+    queryKey: ["device_tokens"],
+    queryFn: async (): Promise<DeviceToken[]> => {
+      const { data, error } = await supabase
+        .from("device_tokens")
+        .select("id, user_id, name, token, active, created_at, last_used_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useCreateDeviceToken() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { user_id: string; name?: string | null; token: string }) => {
+      const { data, error } = await supabase.from("device_tokens").insert(input).select().single();
+      if (error) throw error;
+      return data as DeviceToken;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["device_tokens"] }),
+  });
+}
+
+export function useRevokeDeviceToken() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("device_tokens").update({ active: false }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["device_tokens"] }),
+  });
 }
 
 export function useSaveContact() {

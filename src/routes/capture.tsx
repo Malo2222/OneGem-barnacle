@@ -16,7 +16,7 @@ import {
   useSaveHandle,
   useUserId,
 } from "@/hooks/useGem";
-import { PLATFORMS, parseCapture, type Platform } from "@/lib/gem";
+import { matchContact, PLATFORMS, parseCapture, type Platform } from "@/lib/gem";
 import { isAlikeName } from "@/lib/contact-sync";
 import { useSettings } from "@/lib/settings";
 import { cn } from "@/lib/utils";
@@ -70,8 +70,8 @@ function Capture() {
     if (parsed.body) setBody(parsed.body);
     if (parsed.platform) setPlatform(parsed.platform);
 
-    // Auto identity merge guess ("everyone with an alike name under their name")
     const guess =
+      matchContact(parsed.sender, parsed.platform, contacts, handles) ??
       contacts.find((c) => isAlikeName(c.display_name, parsed.sender)) ??
       contacts.find((c) =>
         handles.some(
