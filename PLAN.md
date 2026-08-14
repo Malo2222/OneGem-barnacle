@@ -1,11 +1,3 @@
-
-SUPABASE_PROJECT_ID="zqwwgcfahfzckmapilhs"
-SUPABASE_PUBLISHABLE_KEY="sb_publishable_IIBKeW7ACXK4_EnM57Pl7A_j3VvTeUh"
-SUPABASE_URL="https://zqwwgcfahfzckmapilhs.supabase.co"
-VITE_SUPABASE_PROJECT_ID="zqwwgcfahfzckmapilhs"
-VITE_SUPABASE_PUBLISHABLE_KEY="sb_publishable_IIBKeW7ACXK4_EnM57Pl7A_j3VvTeUh"
-VITE_SUPABASE_URL="https://zqwwgcfahfzckmapilhs.supabase.co"
-sneaking my .env shi in here
 # Gem — Unified Social Inbox (build plan)
 
 ## Reality constraints (read first)
